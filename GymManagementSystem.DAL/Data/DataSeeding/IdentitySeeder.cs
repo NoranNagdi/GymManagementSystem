@@ -70,7 +70,7 @@ namespace GymManagementSystem.DAL.Data.DataSeeding
                     };
 
                     await userManager.CreateAsync(admin, "P@SsW0rd");
-                    await userManager.AddToRoleAsync(admin, "admin");
+                    await userManager.AddToRoleAsync(admin, "Admin");
 
                 }
                 return;

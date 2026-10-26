@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace GymManagementSystem.PL.Controllers
 {
-    [AllowAnonymous]
     public class IdentityController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -22,11 +21,14 @@ namespace GymManagementSystem.PL.Controllers
             _signInManager = signInManager;
             _logger = logger;
         }
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
+
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model, CancellationToken cancellationToken = default!)
         {
@@ -34,7 +36,14 @@ namespace GymManagementSystem.PL.Controllers
             {
                 return View(model);
             }
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user is null)
+            {
+                _logger.LogWarning($"Invalid login attempt for user {model.Email}.");
+                ModelState.AddModelError("InvalidLogin", "Invalid login attempt.");
+                return View(model);
+            }
+            var result = await _signInManager.PasswordSignInAsync(user.UserName!, model.Password, model.RememberMe, false);
             if (result.Succeeded)
             {
                 _logger.LogInformation($"User {model.Email} Logged In.");
@@ -52,6 +61,20 @@ namespace GymManagementSystem.PL.Controllers
                 ModelState.AddModelError("InvalidLogin", "Invalid login attempt.");
                 return View(model);
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation("User logged out.");
+            return RedirectToAction(nameof(Login), "Identity");
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }
