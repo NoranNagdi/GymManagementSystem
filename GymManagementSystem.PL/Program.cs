@@ -7,7 +7,9 @@ using GymManagementSystem.DAL.Data.Models.Identity;
 using GymManagementSystem.DAL.Repositories.Classes;
 using GymManagementSystem.DAL.Repositories.Interfaces;
 using GymManagementSystem.PL;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,6 +47,19 @@ namespace GymManagementSystem
             });
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<GymDbContext>();
+
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Identity/Login";
+                options.LogoutPath = "/Identity/Logout";
+                options.AccessDeniedPath = "/Identity/AccessDenied";
+            });
+
+            builder.Services.AddControllersWithViews(options =>
+            {
+                var poilcy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                options.Filters.Add(new AuthorizeFilter(poilcy));
+            });
 
             var app = builder.Build();
 

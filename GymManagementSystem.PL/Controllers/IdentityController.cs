@@ -1,12 +1,14 @@
 ﻿using GymManagementSystem.BLL.ViewModels;
 using GymManagementSystem.Controllers;
 using GymManagementSystem.DAL.Data.Models.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace GymManagementSystem.PL.Controllers
 {
+    [AllowAnonymous]
     public class IdentityController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
